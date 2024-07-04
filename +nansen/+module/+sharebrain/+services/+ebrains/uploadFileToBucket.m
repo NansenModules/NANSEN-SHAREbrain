@@ -5,7 +5,7 @@ function uploadFileToBucket(filePath, relativeFilePath, bucketName)
         relativeFilePath = relativeFilePath(2:end);
     end
 
-    BASE_API_URL = nansen.module.sharing.sharebrain.constant.DataProxyBaseUrl;
+    BASE_API_URL = nansen.module.sharebrain.constant.DataProxyBaseUrl;
     endpointPath = sprintf("buckets/%s/data/%s", bucketName, relativeFilePath);
 
     apiURL = BASE_API_URL + endpointPath;
@@ -52,6 +52,6 @@ function accessToken = getToken()
     
     accessToken = getenv('EBRAINS_ACCESS_TOKEN');
     if isempty(accessToken)
-        accessToken = nansen.module.sharing.sharebrain.services.ebrains.uiGetToken();
+        accessToken = nansen.module.sharebrain.services.ebrains.uiGetToken();
     end
 end

@@ -56,13 +56,13 @@ function varargout = uploadData(sessionObject, varargin)
     % Get data locations, make a list of available roots, let user select
     % which one to use and then apply that data location to all sessions
     
-    import nansen.module.sharing.sharebrain.services.ebrains.uploadFileToBucket
+    import nansen.module.sharebrain.services.ebrains.uploadFileToBucket
 
     project = nansen.getCurrentProject();
     configFolder = project.getConfigurationFolder();
     filePath = fullfile(configFolder, 'ebrains_collab_info.json');
     if ~isfile(filePath)
-        nansen.module.sharing.sharebrain.internal.uiGetBucketId()
+        nansen.module.sharebrain.internal.uiGetBucketId()
     end
     collabInfo = jsondecode( fileread(filePath));
     bucketName = collabInfo.title;
