@@ -77,11 +77,14 @@ function varargout = uploadData(sessionObject, varargin)
 
     L = recursiveDir(sessionFolder, 'Type', 'file', 'OutputType', 'FilePath');
 
+    bucketManifest = []; %
+
+
     for i = 1:numel(L)
         filePath = L{i};
     % % for i = 1:numel(dataVariables)
     % %     filePath = sessionObject.getDataFilePath(dataVariables{i});
-        % Todo: Check if file is in bucked
+        % Todo: Check if file is in bucket
         if contains(filePath, rootDataFolder)
             relativeFilePath = strrep(filePath, rootDataFolder, '');
             relativeFilePath = strrep(relativeFilePath, ' ', '_');

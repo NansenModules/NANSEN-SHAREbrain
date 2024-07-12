@@ -11,6 +11,10 @@ function bucketId = uiGetBucketId()
     datasetTitles = regexp([collab_info.description], expression, 'match', 'once')';
 
     selection = uim.dialog.searchSelectDlg(cellstr(datasetTitles), 'Select a Dataset');
+    
+    if isempty(selection)
+        error('Aborted')
+    end
 
     isSelection = strcmp(datasetTitles, selection);
     bucketId = collab_info(isSelection).title;
