@@ -73,6 +73,7 @@ function synchSubjects()
     dsv.studied_specimens = py.list(kgInstances);
     kgcol.updateInstance(dsv)
 
+    disp('Finished synching')
 end
 
 function value = toCamelCase(value)

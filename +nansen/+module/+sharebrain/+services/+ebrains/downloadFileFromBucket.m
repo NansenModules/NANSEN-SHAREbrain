@@ -17,8 +17,22 @@ function downloadFileFromBucket(filePath, relativeFilePath, bucketName, progress
     % while ~finished
     %try
         %downloadURL = getDownloadUrl(apiURL, useToken=false);
-        %[filePath] = downloadFile(filePath, apiURL, ShowFilename=true);
-        task.concrete.downloadFile(filePath, apiURL, 'ProgressDisplay', progressDisplay)
+
+        try
+            webFileSize = nansen.module.sharebrain.internal.fileio.getWebFileSize(apiURL);
+            [filePath] = downloadFile(filePath, apiURL, ShowFilename=true);
+        catch ME
+            fileSize = nansen.module.sharebrain.internal.fileio.getLocalFileSize(filePath);
+            if fileSize ~= webFileSize
+                delete(filePath)
+                filePath = strrep(filePath, ' ', '\ ');
+                [status, msg] = system( sprintf('touch %s', filePath ));
+            end
+            rethrow(ME)
+        end
+
+
+        %task.concrete.downloadFile(filePath, apiURL, 'ProgressDisplay', progressDisplay)
         finished = true;
     %catch ME
         % Reset access token and try again
