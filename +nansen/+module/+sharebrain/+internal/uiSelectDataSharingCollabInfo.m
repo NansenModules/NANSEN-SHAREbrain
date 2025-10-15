@@ -11,6 +11,13 @@ function collabInfo = uiSelectDataSharingCollabInfo(options)
     [~, isSelection] = sort([result.createDate], 'descend');
     collab_info = result(isSelection);
 
+    if isempty(collab_info)
+        error('SHAREbrain:UISelectDatasetCollab:NoCollabsFound', ...
+            ['Could not find any data sharing collabs. You might not be a ', ...
+            'member of any data sharing collabs. Please verify access ', ...
+            'permissions with your curator'])
+    end
+
     % parse description:
     expression = '(?<=Dataset working title: ).+?(?=\n)';
     datasetTitles = regexp([collab_info.description], expression, 'match', 'once')';
