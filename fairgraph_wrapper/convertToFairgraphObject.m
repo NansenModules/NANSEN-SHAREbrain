@@ -1,4 +1,9 @@
 function fairgraphObject = convertToFairgraphObject(openMindsObject, fgClient)
+    
+    arguments
+        openMindsObject openminds.abstract.Schema
+        fgClient py.fairgraph.client.KGClient
+    end
 
     fgType = getFairgraphType( class(openMindsObject) );
 
@@ -6,10 +11,15 @@ function fairgraphObject = convertToFairgraphObject(openMindsObject, fgClient)
 
     propNames = properties(openMindsObject);
 
-
     if isa(openMindsObject, 'openminds.abstract.ControlledTerm')
         fairgraphObject = fairgraphObject.by_name( openMindsObject.name, fgClient );
     else
+        if startsWith(openMindsObject.id, "https://kg.ebrains.eu/api/instances")
+            uuid = extractAfter(openMindsObject.id, "https://kg.ebrains.eu/api/instances/");
+            fairgraphObject = fairgraphObject.from_id( uuid, fgClient, scope="in progress" );
+            return
+        end
+
         for iProp = 1:numel(propNames)
             
             propName = propNames{iProp};

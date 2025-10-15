@@ -46,12 +46,12 @@ classdef KgCollection < matlab.mixin.SetGet
 
             % Find all instances of type in collection.
             omInstances = obj.OpenMINDSCollection.list(options.Type);
-            omIdentityValues = [omInstances.(options.IdentityProp)];
+            %omIdentityValues = [omInstances.(options.IdentityProp)];
 
-            kgInstances = obj.listType(class(omInstances));
-            for i = 1:numel(kgInstances)
-                kgInstances{i}.delete(obj.FairgraphClient);
-            end
+            % kgInstances = obj.listType(class(omInstances));
+            % for i = 1:numel(kgInstances)
+            %     kgInstances{i}.delete(obj.FairgraphClient);
+            % end
 
 
             %fgPropName = generatePythonName(options.IdentityProp);
@@ -178,7 +178,7 @@ classdef KgCollection < matlab.mixin.SetGet
                 else
                     state = '';
                 end
-                omInstance = feval(omClassName, 'id', string(instance.get('@id')), 'state', state);
+                omInstance = feval(omClassName, 'id', string(instance.get('@id')));
             end
 
             if resolve
@@ -289,8 +289,8 @@ classdef KgCollection < matlab.mixin.SetGet
 
     methods (Access = private)
         function initializeFairgraphClient(obj)
-            authClient = ebrains.iam.AuthenticationClient.instance();
-            bearerToken = authClient.AccessToken;
+            tokenManager = ebrains.getTokenManager();
+            bearerToken = tokenManager.AccessToken;
             switch obj.Server
                 case 'prod'
                     hostName = "core.kg.ebrains.eu";
