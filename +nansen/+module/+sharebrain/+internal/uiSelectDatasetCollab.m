@@ -1,4 +1,4 @@
-function collabInfo = uiSelectDataSharingCollabInfo()
+function collabInfo = uiSelectDatasetCollab()
     arguments
         %options.Logger % Todo
     end

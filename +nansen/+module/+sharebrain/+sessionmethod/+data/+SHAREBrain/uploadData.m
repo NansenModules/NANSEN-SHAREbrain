@@ -62,7 +62,7 @@ function varargout = uploadData(sessionObject, varargin)
 
     if ~isfile(filePath)
         % Todo: Consider throwing error instead.
-        nansen.module.sharebrain.internal.uiSelectDataSharingCollabInfo()
+        nansen.module.sharebrain.internal.uiSelectDatasetCollab()
     end
     collabInfo = jsondecode( fileread(filePath));
     bucketName = collabInfo.title;

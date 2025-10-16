@@ -23,5 +23,5 @@ function setDataset()
         end
     end
 
-    nansen.module.sharebrain.internal.uiSelectDataSharingCollabInfo()
+    nansen.module.sharebrain.internal.uiSelectDatasetCollab()
 end
