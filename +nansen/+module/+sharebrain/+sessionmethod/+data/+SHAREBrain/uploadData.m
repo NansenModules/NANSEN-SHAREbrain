@@ -56,8 +56,6 @@ function varargout = uploadData(sessionObject, varargin)
     % Get data locations, make a list of available roots, let user select
     % which one to use and then apply that data location to all sessions
     
-    import nansen.module.sharebrain.services.ebrains.uploadFileToBucket
-
     filePath = nansen.module.sharebrain.internal.getCollabInfoFilepath();
 
     if ~isfile(filePath)
@@ -88,7 +86,7 @@ function varargout = uploadData(sessionObject, varargin)
         if contains(filePath, rootDataFolder)
             relativeFilePath = strrep(filePath, rootDataFolder, '');
             relativeFilePath = strrep(relativeFilePath, ' ', '_');
-            uploadFileToBucket(filePath, relativeFilePath, bucketName)
+            ebrains.bucket.uploadFile(filePath, relativeFilePath, bucketName)
         end
     end
     
