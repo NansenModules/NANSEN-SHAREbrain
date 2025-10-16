@@ -1,7 +1,7 @@
 function collabId = getCollabIdFromProject(project)
 
-    configFolder = project.getConfigurationFolder();
-    filePath = fullfile(configFolder, 'ebrains_collab_info.json');
+    filePath = nansen.module.sharebrain.internal.getCollabInfoFilepath(project);
+
     if ~isfile(filePath)
         nansen.module.sharebrain.internal.uiGetBucketId()
     end

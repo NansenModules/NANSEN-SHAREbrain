@@ -18,13 +18,10 @@ function bucketId = uiGetBucketId()
 
     isSelection = strcmp(datasetTitles, selection);
     bucketId = collab_info(isSelection).title;
-
-    project = nansen.getCurrentProject();
-    configFolder = project.getConfigurationFolder();
     
     % Save to project configuration
     S = collab_info(isSelection);
-    filePath = fullfile(configFolder, 'ebrains_collab_info.json');
+    filePath = nansen.module.sharebrain.internal.getCollabInfoFilepath();
     utility.filewrite(filePath, jsonencode(S))
 end
 

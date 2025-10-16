@@ -32,7 +32,7 @@ function collabInfo = uiSelectDataSharingCollabInfo(options)
     collabInfo = collab_info(isSelection);
 
     if isfield(options, "TargetFolder") && ~isempty(options.TargetFolder)
-        filePath = fullfile(options.TargetFolder, 'ebrains_collab_info.json');
+        filePath = fullfile(options.TargetFolder, nansen.module.sharebrain.constants.CollabInfoFilename);
         utility.filewrite(filePath, jsonencode(collabInfo))
     end
 end

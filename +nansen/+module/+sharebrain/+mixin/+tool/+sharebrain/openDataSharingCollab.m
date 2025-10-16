@@ -1,8 +1,7 @@
 function openDataSharingCollab()
 
-    project = nansen.getCurrentProject();
-    configFolder = project.getConfigurationFolder();
-    filePath = fullfile(configFolder, 'ebrains_collab_info.json');
+    filePath = nansen.module.sharebrain.internal.getCollabInfoFilepath();
+
     if ~isfile(filePath)
         nansen.module.sharebrain.internal.uiGetBucketId()
     end

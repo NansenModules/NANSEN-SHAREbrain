@@ -9,11 +9,7 @@ function setDataset()
 % selection among accessible Dataset Collabs. The selected collab’s name
 % and metadata are then saved to the project’s configuration folder.
 
-    project = nansen.getCurrentProject();
-    configFolder = project.getConfigurationFolder();
-
-    filePath = fullfile(configFolder, 'ebrains_collab_info.json');
-
+    filePath = nansen.module.sharebrain.internal.getCollabInfoFilepath();
     if isfile(filePath)
         title = 'Reset dataset?';
         question = 'EBRAINS Dataset is already configured. Do you want to change this dataset?';
