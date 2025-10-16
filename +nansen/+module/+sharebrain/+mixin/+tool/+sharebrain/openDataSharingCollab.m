@@ -3,7 +3,9 @@ function openDataSharingCollab()
     filePath = nansen.module.sharebrain.internal.getCollabInfoFilepath();
 
     if ~isfile(filePath)
-        nansen.module.sharebrain.internal.uiGetBucketId()
+        error(...
+            ['This project is not associated with any dataset collabs. ', ...
+            'Please link to a dataset collab using the "Set Dataset" method']) % Todo: add error id, improve error message
     end
     collabInfo = jsondecode( fileread(filePath));
 

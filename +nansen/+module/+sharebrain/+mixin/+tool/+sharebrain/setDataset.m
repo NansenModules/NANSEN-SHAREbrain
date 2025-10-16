@@ -23,6 +23,5 @@ function setDataset()
         end
     end
 
-    nansen.module.sharebrain.internal.uiSelectDataSharingCollabInfo(...
-        "TargetFolder", configFolder)
+    nansen.module.sharebrain.internal.uiSelectDataSharingCollabInfo()
 end

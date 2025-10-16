@@ -1,38 +1,23 @@
-function collabInfo = uiSelectDataSharingCollabInfo(options)
+function collabInfo = uiSelectDataSharingCollabInfo()
     arguments
-        options.TargetFolder (1,:) string {mustBeFolder}
         %options.Logger % Todo
     end
     
-    myClient = ebrains.collaboratory.api.Collab();
-    fprintf('Please wait, fetching datasets...\n')
-    [~,result,~] = myClient.searchCollab('search', 'Dataset working title', 'limit', 1000, 'visibility', 'private');
-    
-    [~, isSelection] = sort([result.createDate], 'descend');
-    collab_info = result(isSelection);
+    collab_info = nansen.module.sharebrain.internal.dsc.listDatasetCollabs();
 
-    if isempty(collab_info)
-        error('SHAREbrain:UISelectDatasetCollab:NoCollabsFound', ...
-            ['Could not find any data sharing collabs. You might not be a ', ...
-            'member of any data sharing collabs. Please verify access ', ...
-            'permissions with your curator'])
-    end
-
-    % parse description:
+    % Parse description:
     expression = '(?<=Dataset working title: ).+?(?=\n)';
     datasetTitles = regexp([collab_info.description], expression, 'match', 'once')';
 
     selection = uim.dialog.searchSelectDlg(cellstr(datasetTitles), 'Select a Dataset');
     
     if isempty(selection)
-        error('Aborted')
+        error('Aborted') % Todo: Add error id and detailed error message
     end
 
     isSelection = strcmp(datasetTitles, selection);
     collabInfo = collab_info(isSelection);
 
-    if isfield(options, "TargetFolder") && ~isempty(options.TargetFolder)
-        filePath = fullfile(options.TargetFolder, nansen.module.sharebrain.constants.CollabInfoFilename);
-        utility.filewrite(filePath, jsonencode(collabInfo))
-    end
+    filePath = nansen.module.sharebrain.internal.getCollabInfoFilepath();
+    utility.filewrite(filePath, jsonencode(collabInfo))
 end
