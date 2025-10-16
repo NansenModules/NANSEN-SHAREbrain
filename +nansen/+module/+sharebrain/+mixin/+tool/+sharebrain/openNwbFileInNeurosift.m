@@ -1,6 +1,6 @@
 function openNwbFileInNeurosift()
 
-    baseUrl = nansen.module.sharebrain.constant.NeuroSiftBaseUrl();
+    baseUrl = nansen.module.sharebrain.constants.NeurosiftBaseUrl;
     
     fileUrl = inputdlg('Please enter dataproxy api url:');
     
