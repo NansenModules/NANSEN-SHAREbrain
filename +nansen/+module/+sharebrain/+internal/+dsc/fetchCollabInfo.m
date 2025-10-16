@@ -1,4 +1,4 @@
-function fetchCollabInfo(collabId)
+function collabInfo = fetchCollabInfo(collabId)
 % fetchCollabInfo - Fetch info / metadata for a Data Sharing Collab
     arguments
         collabId (1,1) string {nansen.module.sharebrain.internal.validator.mustBeDataSharingCollabName}
