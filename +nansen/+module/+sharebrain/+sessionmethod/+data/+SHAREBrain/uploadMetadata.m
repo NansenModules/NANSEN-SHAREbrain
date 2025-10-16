@@ -2,23 +2,6 @@ function varargout = uploadMetadata(sessionObject, varargin)
 %CHANGERAWDATAROOT Summary of this function goes here
 %   Detailed explanation goes here
 
-
-% % % % % % % % % % % % % % % INSTRUCTIONS % % % % % % % % % % % % % % %
-% - - - - - - - - - - You can remove this part - - - - - - - - - - - 
-% Instructions on how to use this template: 
-%   1) If the session method should have parameters, these should be
-%      defined in the local function getDefaultParameters at the bottom of
-%      this script.
-%   2) Scroll down to the custom code block below and write code to do
-%   operations on the sessionObjects and it's data.
-%   3) Add documentation (summary and explanation) for the session method
-%      above. PS: Don't change the function definition (inputs/outputs)
-%
-%   For examples: Press e on the keyboard while browsing the session
-%   methods. (e) should appear after the name in the menu, and when you 
-%   select a session method, the m-file will open.
-
-
 % % % % % % % % % % % % CONFIGURATION CODE BLOCK % % % % % % % % % % % % 
 % Create a struct of default parameters (if applicable) and specify one or 
 % more attributes (see nansen.session.SessionMethod.setAttributes) for 
