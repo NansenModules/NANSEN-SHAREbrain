@@ -6,7 +6,8 @@ function fileSizeBytes = getLocalFileSize(filepath)
 
     L = dir(filepath);
     if isempty(L)
-        fileSizeBytes = []; % TODO: Consider whether to throw error instead.
+        error('SHAREBRAIN:FileNotFound', ...
+            'File not found: %s', filepath);
     elseif numel(L) > 1
         error('Multiple files/folders matched the given filepath')
     else
