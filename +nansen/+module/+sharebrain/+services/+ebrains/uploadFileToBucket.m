@@ -10,18 +10,27 @@ function uploadFileToBucket(filePath, relativeFilePath, bucketName)
 
     apiURL = BASE_API_URL + endpointPath;
 
-    finished = false;
-    while ~finished
+    for i = 1:5
         try
             uploadURL = getUploadUrl(apiURL);
-            finished = true;
-        catch ME
+        catch exception
+            % Todo: proper error handling. may fail for other reasons
             % Reset access token and try again
             setenv('EBRAINS_ACCESS_TOKEN', '');
+            if i == 5
+                rethrow(exception)
+            end
         end
     end
 
     [wasSuccess, response] = uploadFile(filePath, uploadURL, ShowFilename=true);
+
+    if ~wasSuccess
+        % Handle the upload failure
+        warning('Failed to upload file: %s', uploadURL);
+        % Todo: improve error handling, parse response and provide more
+        % detailed diagnostics
+    end
 end
 
 function uploadURL = getUploadUrl(apiURL)
@@ -46,12 +55,6 @@ function uploadURL = getUploadUrl(apiURL)
 end
 
 function accessToken = getToken()
-    authClient = ebrains.iam.AuthenticationClient.instance();    
-    accessToken = authClient.AccessToken;
-    return
-    
-    accessToken = getenv('EBRAINS_ACCESS_TOKEN');
-    if isempty(accessToken)
-        accessToken = nansen.module.sharebrain.services.ebrains.uiGetToken();
-    end
+    tokenManager = ebrains.getTokenManager();
+    accessToken = tokenManager.AccessToken;
 end
