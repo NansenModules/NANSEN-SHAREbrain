@@ -19,6 +19,8 @@ function initializeFileRepo()
         repo.type = "Swift";
         dsv.repository = repo;
         
+        % Save repository and dataset version
+        kgsave(repo, "space", space)
         kgsave(dsv, "space", space)
     else
         disp('This Dataset version already has a repository.')
