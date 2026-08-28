@@ -30,15 +30,22 @@ function downloadFileFromBucket(localFilePath, bucketFilePath, bucketName, progr
     %try
         %downloadURL = getDownloadUrl(apiURL, useToken=false);
 
+        % Query the remote size before the download starts. Asking for it
+        % inside the try below left it undefined whenever getWebFileSize
+        % was itself what failed, so the catch block died on the missing
+        % variable and hid the original error.
+        webFileSize = nansen.module.sharebrain.internal.fileio.getWebFileSize(apiURL);
+
         try
-            webFileSize = nansen.module.sharebrain.internal.fileio.getWebFileSize(apiURL);
             [localFilePath] = downloadFile(localFilePath, apiURL, ShowFilename=true);
         catch ME
-            fileSize = nansen.module.sharebrain.internal.fileio.getLocalFileSize(localFilePath);
-            if fileSize ~= webFileSize
+            % Replace a partially written file with an empty one, so a
+            % later attempt does not mistake it for a complete download.
+            localFileSize = nansen.module.sharebrain.internal.fileio.getLocalFileSize(localFilePath);
+            if ~isempty(localFileSize) && localFileSize ~= webFileSize
                 delete(localFilePath)
-                localFilePath = strrep(localFilePath, ' ', '\ ');
-                [status, msg] = system( sprintf('touch %s', localFilePath ));
+                fileId = fopen(localFilePath, 'w');
+                fclose(fileId);
             end
             rethrow(ME)
         end
