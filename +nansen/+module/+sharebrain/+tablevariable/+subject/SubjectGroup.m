@@ -29,9 +29,10 @@ classdef SubjectGroup < nansen.metadata.abstract.TableVariable
 %
 %       subjectObj.updateDynamicVariable("SubjectGroup")
 %
-%   The default update returns the null value. There is no general rule for
-%   deriving a subject's group automatically, so plug any project-specific
-%   derivation logic into the update method.
+%   The update method derives the group from the subject's genotype and
+%   age category. It and the default dropdown options are built from the
+%   same vocabulary (GROUP_PREFIX, STRAIN_TOKENS, AGE_TOKENS), so a value
+%   set programmatically is always one the dropdown offers.
 %
 %   See also nansen.metadata.abstract.TableVariable,
 %            nansen.module.general.core.tablevariable.subject.Species
@@ -41,17 +42,27 @@ classdef SubjectGroup < nansen.metadata.abstract.TableVariable
         DEFAULT_VALUE = {'N/A'}
     end
 
-    properties (Constant)
+    properties (Dependent)
         % LIST_ALTERNATIVES - Dropdown options, read from the project store.
-        %   Dependent (not constant) so the options can change on demand
-        %   without reloading the class definition.
-        LIST_ALTERNATIVES = {'roth2026_subjectgroup_Scn1a-Heterozygous', 'roth2026_subjectgroup_Scn1a-Wildtype'}
+        %   Dependent rather than Constant so setGroupOptions and its
+        %   siblings take effect on the next attribute-table rebuild,
+        %   without reloading the class definition. The table machinery
+        %   reads this from an instance, so a dependent property works.
+        LIST_ALTERNATIVES
     end
 
     properties (Constant, Access = private)
         % Project configuration subfolder and file name holding the options.
         OPTIONS_SUBFOLDER = "custom_options"
         OPTIONS_FILE_NAME = "subject_group_options.json"
+
+        % Vocabulary this project's groups are built from. update composes
+        % its return value from these, and the default dropdown options are
+        % every combination of them, so a value set programmatically is
+        % always one the dropdown offers.
+        GROUP_PREFIX = 'roth2026_SubjectGroup'
+        STRAIN_TOKENS = {'WT', 'Scn1a-Wildtype'; 'Scn1a+/-', 'Scn1a-Heterozygous'}
+        AGE_TOKENS = {'young_adult', 'Young-adult'; 'juvenile', 'Juvenile'}
     end
 
     methods
@@ -59,56 +70,52 @@ classdef SubjectGroup < nansen.metadata.abstract.TableVariable
             obj@nansen.metadata.abstract.TableVariable(varargin{:});
         end
 
-        % function options = get.LIST_ALTERNATIVES(~)
-        %     options = nansen.module.sharebrain.tablevariable.subject.SubjectGroup.getGroupOptions();
-        % end
+        function options = get.LIST_ALTERNATIVES(~)
+            options = nansen.module.sharebrain.tablevariable.subject.SubjectGroup.getGroupOptions();
+        end
     end
 
     methods (Static)
-        function value = update(subjectObj) %#ok<INUSD>
+        function value = update(subjectObj)
         %update Update function for programmatic value assignment.
         %
         %   value = update() returns the null value. The table variable
         %       machinery calls update with no arguments to determine the
         %       expected data type.
         %
-        %   value = update(subjectObj) returns the value for a single
-        %       subject. By default this is the null value, because there is
-        %       no general rule for deriving a subject's group. Insert
-        %       project-specific derivation logic here if the group can be
-        %       computed from the subject (for example a subjectId-to-group
-        %       lookup).
+        %   value = update(subjectObj) derives the group from the subject's
+        %       genotype and age category, composing the name from the same
+        %       vocabulary the default dropdown options are built from. A
+        %       subject whose genotype or age category is not one of the
+        %       recognised values keeps the null value.
 
             value = {'N/A'};
             if nargin < 1; return; end
 
-            % Insert subject-specific derivation logic here.
-            if strcmp(subjectObj.Genotype, 'WT')
-                if strcmp(subjectObj.AgeCategory, 'young_adult')
-                    value = 'roth2026_SubjectGroup_Scn1a-Wildtype_Young-adult';
-                elseif strcmp(subjectObj.AgeCategory, 'juvenile')
-                    value = 'roth2026_SubjectGroup_Scn1a-Wildtype_Juvenile';
-                end
-            elseif strcmp(subjectObj.Genotype, 'Scn1a+/-')
-                if strcmp(subjectObj.AgeCategory, 'young_adult')
-                    value = 'roth2026_SubjectGroup_Scn1a-Heterozygous_Young-adult';
-                elseif strcmp(subjectObj.AgeCategory, 'juvenile')
-                    value = 'roth2026_SubjectGroup_Scn1a-Heterozygous_Juvenile';
-                end
+            import nansen.module.sharebrain.tablevariable.subject.SubjectGroup
+
+            strainToken = SubjectGroup.lookupToken( ...
+                SubjectGroup.STRAIN_TOKENS, subjectObj.Genotype);
+            ageToken = SubjectGroup.lookupToken( ...
+                SubjectGroup.AGE_TOKENS, subjectObj.AgeCategory);
+
+            if isempty(strainToken) || isempty(ageToken)
+                return
             end
+
+            value = SubjectGroup.composeGroupName(strainToken, ageToken);
         end
 
         function options = getGroupOptions()
         %getGroupOptions Return the current list of dropdown options.
         %
-        %   Returns the null value as the only option when no options have
-        %   been stored for the project, or when no project is available
-        %   (for example while the attribute table is being built outside an
-        %   active user session).
+        %   Returns the default options when none have been stored for the
+        %   project, or when no project is available (for example while the
+        %   attribute table is being built outside an active user session).
 
             import nansen.module.sharebrain.tablevariable.subject.SubjectGroup
 
-            defaultOptions = {'N/A'};
+            defaultOptions = SubjectGroup.getDefaultGroupOptions();
             try
                 filePath = SubjectGroup.getOptionsFilePath();
             catch
@@ -194,6 +201,46 @@ classdef SubjectGroup < nansen.metadata.abstract.TableVariable
     end
 
     methods (Static, Access = private)
+        function options = getDefaultGroupOptions()
+        %getDefaultGroupOptions Null value plus every derivable group.
+            import nansen.module.sharebrain.tablevariable.subject.SubjectGroup
+
+            strainTokens = SubjectGroup.STRAIN_TOKENS(:, 2);
+            ageTokens = SubjectGroup.AGE_TOKENS(:, 2);
+
+            derived = cell(1, numel(strainTokens) * numel(ageTokens));
+            k = 0;
+            for i = 1:numel(strainTokens)
+                for j = 1:numel(ageTokens)
+                    k = k + 1;
+                    derived{k} = SubjectGroup.composeGroupName( ...
+                        strainTokens{i}, ageTokens{j});
+                end
+            end
+
+            options = [SubjectGroup.DEFAULT_VALUE, derived];
+        end
+
+        function name = composeGroupName(strainToken, ageToken)
+        %composeGroupName Assemble a group name from its two tokens.
+            import nansen.module.sharebrain.tablevariable.subject.SubjectGroup
+            name = sprintf('%s_%s_%s', SubjectGroup.GROUP_PREFIX, ...
+                strainToken, ageToken);
+        end
+
+        function token = lookupToken(tokenMap, key)
+        %lookupToken Token for key, or empty when key is not recognised.
+        %   tokenMap is a two-column cell array of subject values in the
+        %   first column and the token each contributes in the second.
+            token = '';
+            if isempty(key); return; end
+
+            isMatch = strcmp(tokenMap(:, 1), key);
+            if any(isMatch)
+                token = tokenMap{find(isMatch, 1), 2};
+            end
+        end
+
         function filePath = getOptionsFilePath()
         %getOptionsFilePath Full path to the options JSON in the project.
         %   Does not create the folder; saving the file creates it on
