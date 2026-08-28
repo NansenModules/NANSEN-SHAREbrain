@@ -1,4 +1,16 @@
-function synchSubjects(options)
+function syncSubjectsToKnowledgeGraph(options)
+%syncSubjectsToKnowledgeGraph - Sync subjects and states to the KG
+%   syncSubjectsToKnowledgeGraph() builds an openMINDS Subject for
+%   every subject in the project's Subject metatable, adds a
+%   SubjectState per session recording the animal's age at that
+%   session, pushes them to the collab's Knowledge Graph space, and
+%   sets them as the studied specimens of the dataset version.
+%
+%   syncSubjectsToKnowledgeGraph(SubjectIgnorePattern=PATTERN) skips
+%   subjects whose identifier matches the regular expression PATTERN.
+%
+%   See also registerBucketAsFileRepository,
+%   nansen.module.sharebrain.metadata.getOpenMINDSCollection
 
     arguments
         options.SubjectIgnorePattern (1,1) string = missing
@@ -83,5 +95,5 @@ function synchSubjects(options)
     dsv.studied_specimens = py.list(kgInstances);
     kgcol.updateInstance(dsv)
 
-    disp('Finished synching')
+    disp('Finished syncing')
 end

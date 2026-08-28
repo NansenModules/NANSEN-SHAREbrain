@@ -1,4 +1,15 @@
-function initializeFileRepo()
+function registerBucketAsFileRepository()
+%registerBucketAsFileRepository - Record the collab bucket in the KG
+%   registerBucketAsFileRepository() sets the data proxy bucket of
+%   the collab linked to the current project as the FileRepository
+%   of the dataset version in the Knowledge Graph, and saves both to
+%   the collab's KG space. Nothing is created in the bucket itself.
+%
+%   A dataset version that already has a repository is left
+%   untouched.
+%
+%   See also syncSubjectsToKnowledgeGraph,
+%   nansen.module.sharebrain.metadata.getKGCollabSpace
     
     % Todo : 
     %  - Structure pattern
