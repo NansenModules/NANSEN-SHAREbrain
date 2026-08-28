@@ -14,13 +14,7 @@ function uploadData(options)
     import nansen.module.sharebrain.services.ebrains.uploadFileToBucket
 
     % Find the bucket name
-    project = nansen.getCurrentProject();
-    configFolder = project.getConfigurationFolder();
-    filePath = fullfile(configFolder, 'ebrains_collab_info.json');
-    if ~isfile(filePath)
-        nansen.module.sharebrain.internal.uiGetBucketId()
-    end
-    collabInfo = jsondecode( fileread(filePath));
+    collabInfo = nansen.module.sharebrain.internal.ensureCollabInfo();
     bucketName = collabInfo.title;
 
     % List all files in the Data Location
