@@ -12,7 +12,7 @@ function setDataset()
     project = nansen.getCurrentProject();
     configFolder = project.getConfigurationFolder();
 
-    filePath = fullfile(configFolder, 'ebrains_collab_info.json');
+    filePath = nansen.module.sharebrain.internal.getCollabInfoFilePath(configFolder);
 
     if isfile(filePath)
         title = 'Reset dataset?';

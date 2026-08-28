@@ -17,7 +17,7 @@ function collabInfo = ensureCollabInfo(project)
     end
 
     configFolder = project.getConfigurationFolder();
-    filePath = fullfile(configFolder, "ebrains_collab_info.json");
+    filePath = nansen.module.sharebrain.internal.getCollabInfoFilePath(configFolder);
 
     if ~isfile(filePath)
         nansen.module.sharebrain.internal.uiSelectDataSharingCollabInfo(...
