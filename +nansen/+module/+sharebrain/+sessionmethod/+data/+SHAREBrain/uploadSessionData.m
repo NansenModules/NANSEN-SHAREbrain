@@ -65,7 +65,7 @@ function varargout = uploadSessionData(sessionObject, varargin)
     import nansen.module.sharebrain.services.ebrains.uploadFileToBucket
 
     collabInfo = nansen.module.sharebrain.internal.ensureCollabInfo();
-    bucketName = collabInfo.title;
+    bucketName = collabInfo.name;
 
     dataLocName = params.Alternative;
 

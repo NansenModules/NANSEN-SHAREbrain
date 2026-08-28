@@ -26,7 +26,7 @@ function uploadProjectData(options)
 
     % Find the bucket name
     collabInfo = nansen.module.sharebrain.internal.ensureCollabInfo();
-    bucketName = collabInfo.title;
+    bucketName = collabInfo.name;
 
     % List all files in the Data Location
     dlm = nansen.DataLocationModel;

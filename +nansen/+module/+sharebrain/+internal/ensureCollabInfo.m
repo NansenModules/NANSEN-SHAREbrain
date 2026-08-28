@@ -9,6 +9,10 @@ function collabInfo = ensureCollabInfo(project)
 %   collabInfo = ensureCollabInfo(PROJECT) returns the collab info for
 %   PROJECT instead of the current project.
 %
+%   A warning is issued when the collab's name and title differ, since
+%   this module addresses both the bucket and the Knowledge Graph space
+%   by the name.
+%
 %   See also uiSelectDataSharingCollabInfo, getCollabIdFromProject,
 %   nansen.getCurrentProject
 
@@ -25,4 +29,22 @@ function collabInfo = ensureCollabInfo(project)
     end
 
     collabInfo = jsondecode( fileread(filePath) );
+    warnIfNameAndTitleDiffer(collabInfo)
+end
+
+function warnIfNameAndTitleDiffer(collabInfo)
+%warnIfNameAndTitleDiffer Flag a collab whose name and title have drifted
+%   These are expected to hold the same value. Both the data proxy bucket
+%   and the Knowledge Graph space are addressed by the name, so a title
+%   that deviates usually means the collab was created differently than
+%   this module assumes and the bucket may not be where it expects.
+
+    if ~strcmp(collabInfo.name, collabInfo.title)
+        warning("SHAREbrain:CollabInfo:NameTitleMismatch", ...
+            "Collab name ('%s') and title ('%s') differ. This module " + ...
+            "addresses the bucket and the Knowledge Graph space by the " + ...
+            "name. Verify that '%s' is the intended bucket for this " + ...
+            "dataset.", ...
+            collabInfo.name, collabInfo.title, collabInfo.name)
+    end
 end
