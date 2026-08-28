@@ -1,4 +1,10 @@
-function synchSubjects()
+function synchSubjects(options)
+
+    arguments
+        options.SubjectIgnorePattern (1,1) string = missing
+    end
+
+    import nansen.module.sharebrain.internal.toCamelCase
     
     project = nansen.getCurrentProject();
     projectFolder = project.FolderPath;
@@ -7,22 +13,26 @@ function synchSubjects()
     if ~isfolder(openmindsFolder); mkdir(openmindsFolder); end
 
     % Open openMINDS collection
-    col = openminds.Collection( );
-    %col.load( openmindsFolder )
+    collection = openminds.Collection( );
 
     % Open subject metatable
     metaTable = project.MetaTableCatalog.getMasterMetaTable('Subject');
     subjectTable = metaTable.entries;
     subjectIds = string( metaTable.members );
 
-    ignore = startsWith(subjectIds, "aq");
+    if ~ismissing(options.SubjectIgnorePattern)
+        ignore = regexp(subjectIds, options.SubjectIgnorePattern);
+        ignore = ~cellfun(@isempty, ignore);
+    else
+        ignore = false(height(subjectTable), 1);
+    end
+    
     subjectTable = subjectTable(~ignore, :);
     subjectIds = subjectIds(~ignore);
 
-    sessionMetaTable = project.MetaTableCatalog.getMetaTable('Shareable');
+    sessionMetaTable = project.MetaTableCatalog.getMetaTable('Session');
     sessionTable = sessionMetaTable.entries;
-    sessionIds = string( sessionMetaTable.members );
-
+    % sessionIds = string( sessionMetaTable.members ); Currently not used
 
     for i = 1:numel(subjectIds)
         subjectInfo = table2struct( subjectTable(i, :) );
@@ -33,7 +43,7 @@ function synchSubjects()
             'lookupLabel', sprintf('%s-%s', project.Name, string(subjectInfo.SubjectID)), ...
             'species', toCamelCase(subjectInfo.Species) );
 
-        col.add(omSubject);
+        collection.add(omSubject);
 
         subjectSessions = sessionTable(string(sessionTable.subjectID) == string(subjectInfo.SubjectID), :);
 
@@ -60,7 +70,7 @@ function synchSubjects()
 
     % Create KG / FG client
     space = sprintf('collab-%s', nansen.module.sharebrain.internal.getCollabIdFromProject(project));
-    kgcol = KgCollection('Space', space, 'OpenMINDSCollection', col);
+    kgcol = KgCollection('Space', space, 'OpenMINDSCollection', collection);
 
     % Synch subjects...
     kgInstances = kgcol.synch(...
@@ -74,14 +84,4 @@ function synchSubjects()
     kgcol.updateInstance(dsv)
 
     disp('Finished synching')
-end
-
-function value = toCamelCase(value)
-    if iscell(value)
-        value = string(value);
-    end
-
-    value = strrep(value, ' ', '_');
-    value = utility.string.snake2camel(char(value));
-    value = string(value);
 end
