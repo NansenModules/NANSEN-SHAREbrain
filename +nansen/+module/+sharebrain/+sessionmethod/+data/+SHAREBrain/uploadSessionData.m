@@ -81,14 +81,14 @@ function varargout = uploadSessionData(sessionObject, varargin)
 
 
     for i = 1:numel(L)
-        filePath = L{i};
+        localFilePath = L{i};
     % % for i = 1:numel(dataVariables)
-    % %     filePath = sessionObject.getDataFilePath(dataVariables{i});
+    % %     localFilePath = sessionObject.getDataFilePath(dataVariables{i});
         % Todo: Check if file is in bucket
-        if contains(filePath, rootDataFolder)
-            relativeFilePath = strrep(filePath, rootDataFolder, '');
-            relativeFilePath = strrep(relativeFilePath, ' ', '_');
-            uploadFileToBucket(filePath, relativeFilePath, bucketName)
+        if contains(localFilePath, rootDataFolder)
+            bucketFilePath = strrep(localFilePath, rootDataFolder, '');
+            bucketFilePath = strrep(bucketFilePath, ' ', '_');
+            uploadFileToBucket(localFilePath, bucketFilePath, bucketName)
         end
     end
     
