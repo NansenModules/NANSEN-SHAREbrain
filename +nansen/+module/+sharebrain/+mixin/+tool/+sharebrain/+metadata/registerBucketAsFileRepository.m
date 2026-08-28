@@ -15,18 +15,17 @@ function registerBucketAsFileRepository()
     %  - Structure pattern
     %  - hostedBy
 
-    project = nansen.getCurrentProject();
-    
-    collabId = nansen.module.sharebrain.internal.getCollabIdFromProject(project);
-    space = sprintf('collab-%s', collabId);
+    collabName = nansen.module.sharebrain.internal.getCollabNameFromProject();
+    space = nansen.module.sharebrain.metadata.getKGCollabSpace();
 
-    dsvUuid = collabId(3:end);
+    dsvUuid = nansen.module.sharebrain.internal.getDatasetVersionUuid();
     dsv = kgpull(dsvUuid);
 
     if isempty(dsv.repository)
         repo = openminds.core.FileRepository();
-        repo.name = sprintf('bucket/%s', collabId);
-        repo.IRI = sprintf("https://data-proxy.ebrains.eu/api/v1/buckets/%s", collabId);
+        repo.name = sprintf('bucket/%s', collabName);
+        repo.IRI = nansen.module.sharebrain.constant.DataProxyBaseUrl() + ...
+            sprintf("buckets/%s", collabName);
         repo.type = "Swift";
         dsv.repository = repo;
         

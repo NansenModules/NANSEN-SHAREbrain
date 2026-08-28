@@ -1,13 +1,15 @@
-function setDataset()
-% setDataset - (Interactively) Link a NANSEN project to a Dataset Collab
+function linkDataset()
+%linkDataset - Link a NANSEN project to an EBRAINS dataset collab
+%   linkDataset() links the current NANSEN project to a data sharing
+%   collab and saves the selected collab's metadata to the project's
+%   configuration folder.
 %
-% This function allows the user to link the current NANSEN project to a
-% data-sharing collab (Dataset Collab). It first checks whether a collab is
-% already linked to the project. If one exists, the user is prompted to
-% confirm whether they want to link a different dataset. If no dataset is
-% linked—or if the user chooses to re-link—a dialog is opened that allows
-% selection among accessible Dataset Collabs. The selected collab’s name
-% and metadata are then saved to the project’s configuration folder.
+%   When the project is already linked, the user is asked to confirm
+%   before a different dataset is chosen. Otherwise a dialog opens for
+%   selection among the accessible dataset collabs.
+%
+%   See also openDataSharingCollab,
+%   nansen.module.sharebrain.internal.ensureCollabInfo
 
     project = nansen.getCurrentProject();
     configFolder = project.getConfigurationFolder();

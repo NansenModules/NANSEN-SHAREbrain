@@ -81,7 +81,7 @@ function syncSubjectsToKnowledgeGraph(options)
     end
 
     % Create KG / FG client
-    space = sprintf('collab-%s', nansen.module.sharebrain.internal.getCollabIdFromProject(project));
+    space = nansen.module.sharebrain.metadata.getKGCollabSpace();
     kgcol = KgCollection('Space', space, 'OpenMINDSCollection', collection);
 
     % Synch subjects...
@@ -90,7 +90,7 @@ function syncSubjectsToKnowledgeGraph(options)
         'IdentityProp', 'internalIdentifier');
     
     % Add subjects to DatasetVersion
-    dsvUuid = strrep(space, 'collab-d-', '');
+    dsvUuid = nansen.module.sharebrain.internal.getDatasetVersionUuid();
     dsv = kgcol.getFromId(dsvUuid, 'openminds.core.products.DatasetVersion');
     dsv.studied_specimens = py.list(kgInstances);
     kgcol.updateInstance(dsv)

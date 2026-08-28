@@ -13,7 +13,7 @@ function collabInfo = ensureCollabInfo(project)
 %   this module addresses both the bucket and the Knowledge Graph space
 %   by the name.
 %
-%   See also uiSelectDataSharingCollabInfo, getCollabIdFromProject,
+%   See also uiSelectDataSharingCollabInfo, getCollabNameFromProject,
 %   nansen.getCurrentProject
 
     arguments

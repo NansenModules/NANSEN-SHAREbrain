@@ -1,6 +1,6 @@
 function collabInfo = uiSelectDataSharingCollabInfo(options)
     arguments
-        options.TargetFolder (1,:) string {mustBeFolder}
+        options.TargetFolder (1,1) string {mustBeFolder}
         %options.Logger % Todo
     end
     
@@ -12,7 +12,7 @@ function collabInfo = uiSelectDataSharingCollabInfo(options)
     collab_info = result(isSelection);
 
     if isempty(collab_info)
-        error('SHAREbrain:UISelectDatasetCollab:NoCollabsFound', ...
+        error('SHAREbrain:CollabInfo:NoCollabsFound', ...
             ['Could not find any data sharing collabs. You might not be a ', ...
             'member of any data sharing collabs. Please verify access ', ...
             'permissions with your curator'])
