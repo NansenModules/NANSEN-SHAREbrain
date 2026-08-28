@@ -1,5 +1,12 @@
-function uploadFileToBucket(filePath, relativeFilePath, bucketName)
-    
+function uploadFileToBucket(filePath, relativeFilePath, bucketName, options)
+
+    arguments
+        filePath
+        relativeFilePath
+        bucketName
+        options.ShowWaitbar (1,1) logical = false
+    end
+
     if strncmp(char(relativeFilePath), filesep, 1)
         relativeFilePath = char(relativeFilePath);
         relativeFilePath = relativeFilePath(2:end);
@@ -23,7 +30,13 @@ function uploadFileToBucket(filePath, relativeFilePath, bucketName)
         end
     end
 
-    [wasSuccess, response] = uploadFile(filePath, uploadURL, ShowFilename=true);
+    if options.ShowWaitbar
+        displayMode = 'Dialog Box';
+    else
+        displayMode = 'Command Window';
+    end
+
+    [wasSuccess, response] = uploadFile(filePath, uploadURL, ShowFilename=true, DisplayMode=displayMode);
 
     if ~wasSuccess
         % Handle the upload failure
