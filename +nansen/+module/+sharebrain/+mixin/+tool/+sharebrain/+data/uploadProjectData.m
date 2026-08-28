@@ -1,5 +1,16 @@
-function uploadData(options)
-% uploadData - Upload data from the Processed folder to the DataProxy Bucket
+function uploadProjectData(options)
+%uploadProjectData - Upload a whole data location to the EBRAINS bucket
+%   uploadProjectData() uploads every file under the Processed data
+%   location of the current project to the data proxy bucket of the
+%   EBRAINS collab the project is linked to. Files already present in
+%   the bucket are skipped, and spaces in file names are replaced with
+%   underscores.
+%
+%   uploadProjectData(DataLocationName=NAME) uploads the data location
+%   NAME instead of Processed.
+%
+%   See also nansen.module.sharebrain.services.ebrains.uploadFileToBucket,
+%   nansen.module.sharebrain.internal.ensureCollabInfo
 
 %   Todo:
 %   [ ] Consider whether source data location can also be retrieved from 

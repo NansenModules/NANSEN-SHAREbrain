@@ -1,9 +1,9 @@
-function varargout = uploadData(sessionObject, varargin)
-%uploadData - Upload the session's data files to the EBRAINS bucket
-%   uploadData(sessionObject) uploads every file under the session
-%   folder of the selected data location to the data proxy bucket of
-%   the EBRAINS collab that the current project is linked to. Spaces
-%   in file names are replaced with underscores.
+function varargout = uploadSessionData(sessionObject, varargin)
+%uploadSessionData - Upload one session's data files to the bucket
+%   uploadSessionData(sessionObject) uploads every file under the
+%   session folder of the selected data location to the data proxy
+%   bucket of the EBRAINS collab the current project is linked to.
+%   Spaces in file names are replaced with underscores.
 %
 %   See also nansen.module.sharebrain.services.ebrains.uploadFileToBucket,
 %   nansen.module.sharebrain.internal.ensureCollabInfo
