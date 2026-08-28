@@ -28,7 +28,7 @@ function varargout = uploadData(sessionObject, varargin)
     params = getDefaultParameters();
     
     % Create a cell array with attribute keywords
-    ATTRIBUTES = {'batch', 'queueable'};   
+    ATTRIBUTES = {'serial', 'queueable'};   
    
     % Get all data location names and make a list of alternatives
     dlm = nansen.DataLocationModel;
