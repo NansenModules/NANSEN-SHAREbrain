@@ -38,6 +38,15 @@ function warnIfNameAndTitleDiffer(collabInfo)
 %   and the Knowledge Graph space are addressed by the name, so a title
 %   that deviates usually means the collab was created differently than
 %   this module assumes and the bucket may not be where it expects.
+%
+%   A configuration file written before the module stored the collab info
+%   verbatim holds the name alone. There is nothing to compare then, and
+%   the name is the field the bucket and the space are addressed by, so
+%   such a file keeps working rather than erroring on the missing title.
+
+    if ~isfield(collabInfo, 'title')
+        return
+    end
 
     if ~strcmp(collabInfo.name, collabInfo.title)
         warning("SHAREbrain:CollabInfo:NameTitleMismatch", ...
