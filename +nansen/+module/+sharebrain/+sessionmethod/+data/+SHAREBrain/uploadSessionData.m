@@ -1,6 +1,12 @@
-function varargout = uploadData(sessionObject, varargin)
-%CHANGERAWDATAROOT Summary of this function goes here
-%   Detailed explanation goes here
+function varargout = uploadSessionData(sessionObject, varargin)
+%uploadSessionData - Upload one session's data files to the bucket
+%   uploadSessionData(sessionObject) uploads every file under the
+%   session folder of the selected data location to the data proxy
+%   bucket of the EBRAINS collab the current project is linked to.
+%   Spaces in file names are replaced with underscores.
+%
+%   See also nansen.module.sharebrain.services.ebrains.uploadFileToBucket,
+%   nansen.module.sharebrain.internal.ensureCollabInfo
 
 
 % % % % % % % % % % % % % % % INSTRUCTIONS % % % % % % % % % % % % % % %
@@ -58,14 +64,8 @@ function varargout = uploadData(sessionObject, varargin)
     
     import nansen.module.sharebrain.services.ebrains.uploadFileToBucket
 
-    project = nansen.getCurrentProject();
-    configFolder = project.getConfigurationFolder();
-    filePath = fullfile(configFolder, 'ebrains_collab_info.json');
-    if ~isfile(filePath)
-        nansen.module.sharebrain.internal.uiGetBucketId()
-    end
-    collabInfo = jsondecode( fileread(filePath));
-    bucketName = collabInfo.title;
+    collabInfo = nansen.module.sharebrain.internal.ensureCollabInfo();
+    bucketName = collabInfo.name;
 
     dataLocName = params.Alternative;
 
@@ -81,14 +81,14 @@ function varargout = uploadData(sessionObject, varargin)
 
 
     for i = 1:numel(L)
-        filePath = L{i};
+        localFilePath = L{i};
     % % for i = 1:numel(dataVariables)
-    % %     filePath = sessionObject.getDataFilePath(dataVariables{i});
+    % %     localFilePath = sessionObject.getDataFilePath(dataVariables{i});
         % Todo: Check if file is in bucket
-        if contains(filePath, rootDataFolder)
-            relativeFilePath = strrep(filePath, rootDataFolder, '');
-            relativeFilePath = strrep(relativeFilePath, ' ', '_');
-            uploadFileToBucket(filePath, relativeFilePath, bucketName)
+        if contains(localFilePath, rootDataFolder)
+            bucketFilePath = strrep(localFilePath, rootDataFolder, '');
+            bucketFilePath = strrep(bucketFilePath, ' ', '_');
+            uploadFileToBucket(localFilePath, bucketFilePath, bucketName)
         end
     end
     

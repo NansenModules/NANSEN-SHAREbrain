@@ -1,7 +1,7 @@
 function fileSizeBytes = getWebFileSize(webFileUrl)
 %getWebFileSize Get file size of a file on the web
 %
-%   fileSizeBytes = getWebFileSize(filepath) returns the filesize in
+%   fileSizeBytes = getWebFileSize(webFileUrl) returns the filesize in
 %   bytes for a file at the specified web url
 
     import matlab.net.URI
@@ -12,7 +12,8 @@ function fileSizeBytes = getWebFileSize(webFileUrl)
     response = req.send(uri);
 
     if strcmp( response.StatusCode, 'NotFound' )
-        error('FILEIO:WebFileNotFound', 'File "%s" was not found', webFileUrl)
+        error('SHAREbrain:FileIO:WebFileNotFound', ...
+            'File "%s" was not found', webFileUrl)
     end
 
     contentLengthField = response.getFields("Content-Length");

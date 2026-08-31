@@ -1,13 +1,25 @@
-function downloadFileFromBucket(filePath, relativeFilePath, bucketName, progressDisplay)
-% downloadFileFromBucket - Download a file from an EBRAINS bucket (swift object storage)
+function downloadFileFromBucket(localFilePath, bucketFilePath, bucketName, progressDisplay)
+%downloadFileFromBucket - Download one file from an EBRAINS bucket
+%   downloadFileFromBucket(localFilePath, bucketFilePath, bucketName) downloads the
+%   file stored at bucketFilePath in the Swift object storage bucket
+%   named bucketName and writes it to localFilePath. bucketFilePath is
+%   relative to the bucket's data folder, matching uploadFileToBucket,
+%   so the same path round-trips through both functions.
+%
+%   When the transfer fails, a local file whose size does not match the
+%   size reported by the server is deleted and replaced with an empty
+%   file before the original error is rethrown.
+%
+%   See also uploadFileToBucket,
+%   nansen.module.sharebrain.constant.DataProxyBaseUrl
     
-    if strncmp(char(relativeFilePath), filesep, 1)
-        relativeFilePath = char(relativeFilePath);
-        relativeFilePath = relativeFilePath(2:end);
+    if strncmp(char(bucketFilePath), filesep, 1)
+        bucketFilePath = char(bucketFilePath);
+        bucketFilePath = bucketFilePath(2:end);
     end
 
     BASE_API_URL = nansen.module.sharebrain.constant.DataProxyBaseUrl;
-    endpointPath = sprintf("buckets/%s/%s", bucketName, relativeFilePath);
+    endpointPath = sprintf("buckets/%s/data/%s", bucketName, bucketFilePath);
 
     apiURL = BASE_API_URL + endpointPath;
 
@@ -18,21 +30,28 @@ function downloadFileFromBucket(filePath, relativeFilePath, bucketName, progress
     %try
         %downloadURL = getDownloadUrl(apiURL, useToken=false);
 
+        % Query the remote size before the download starts. Asking for it
+        % inside the try below left it undefined whenever getWebFileSize
+        % was itself what failed, so the catch block died on the missing
+        % variable and hid the original error.
+        webFileSize = nansen.module.sharebrain.internal.fileio.getWebFileSize(apiURL);
+
         try
-            webFileSize = nansen.module.sharebrain.internal.fileio.getWebFileSize(apiURL);
-            [filePath] = downloadFile(filePath, apiURL, ShowFilename=true);
+            [localFilePath] = downloadFile(localFilePath, apiURL, ShowFilename=true);
         catch ME
-            fileSize = nansen.module.sharebrain.internal.fileio.getLocalFileSize(filePath);
-            if fileSize ~= webFileSize
-                delete(filePath)
-                filePath = strrep(filePath, ' ', '\ ');
-                [status, msg] = system( sprintf('touch %s', filePath ));
+            % Replace a partially written file with an empty one, so a
+            % later attempt does not mistake it for a complete download.
+            localFileSize = nansen.module.sharebrain.internal.fileio.getLocalFileSize(localFilePath);
+            if ~isempty(localFileSize) && localFileSize ~= webFileSize
+                delete(localFilePath)
+                fileId = fopen(localFilePath, 'w');
+                fclose(fileId);
             end
             rethrow(ME)
         end
 
 
-        %task.concrete.downloadFile(filePath, apiURL, 'ProgressDisplay', progressDisplay)
+        %task.concrete.downloadFile(localFilePath, apiURL, 'ProgressDisplay', progressDisplay)
         finished = true;
     %catch ME
         % Reset access token and try again
@@ -40,7 +59,7 @@ function downloadFileFromBucket(filePath, relativeFilePath, bucketName, progress
     %end
     % end
 
-    %[filePath] = downloadFile(filePath, downloadURL, ShowFilename=true);
+    %[localFilePath] = downloadFile(localFilePath, downloadURL, ShowFilename=true);
 end
 
 function downloadURL = getDownloadUrl(apiURL, options)
