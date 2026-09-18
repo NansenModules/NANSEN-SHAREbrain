@@ -3,6 +3,10 @@ classdef constants
         DataSharingCollabPrefix = "d-"
         CollabInfoFilename = "ebrains_collab_info.json"
 
+        % Names the bucket of a dataset cloned from EBRAINS, in the root
+        % folder of the clone
+        BucketInfoFilename = ".ebrains-bucket.json"
+
         % URL Constants
         NeurosiftBaseUrl = "https://neurosift.app/?p=/nwb"
     end
