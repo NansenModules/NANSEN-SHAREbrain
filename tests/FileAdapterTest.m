@@ -50,6 +50,17 @@ classdef FileAdapterTest < matlab.unittest.TestCase
             testCase.verifyEqual(data.SliceTiming, [0; 1])
         end
 
+        function testXMLReturnsElementsAndAttributes(testCase)
+            filePath = fullfile(testCase.Folder, "spatial_data.xml");
+            writelines('<registration version="2"><scale unit="um">0.5</scale></registration>', filePath)
+
+            data = nansen.module.sharebrain.fileadapter.XML(char(filePath)).load();
+
+            testCase.verifyEqual(data.versionAttribute, 2)
+            testCase.verifyEqual(data.scale.Text, 0.5)
+            testCase.verifyEqual(data.scale.unitAttribute, "um")
+        end
+
         function testNIfTIReadsCompressedVolume(testCase)
             testCase.assumeEqual(exist('niftiwrite', 'file'), 2, 'The Image Processing Toolbox is not installed.')
             volume = reshape(single(1:24), 2, 3, 4);
