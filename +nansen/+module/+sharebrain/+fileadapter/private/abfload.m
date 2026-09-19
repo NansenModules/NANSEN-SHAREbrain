@@ -626,42 +626,58 @@ switch h.nOperationMode
     end
     % extract timing information on sweeps
     if (h.lSynchArrayPtr<=0 || h.lSynchArraySize<=0)
-      fclose(fid);
-      error('internal variables ''lSynchArraynnn'' are zero or negative');
+      % Modified for NANSEN-SHAREbrain: an ABF 1 file recorded in a
+      % fixed-length mode can lack the synch array, where the original
+      % stops with an error. The sweeps are read one after the other
+      % below in either case, so their length is the number of points
+      % per episode and channel. Only the start times of the sweeps are
+      % not known, so h.sweepStartInPts is not set and the stop time in
+      % h.recTime is NaN.
+      if h.lActualEpisodes<=0
+        fclose(fid);
+        error('file has no synch array and records no episodes, so the sweep length is not known');
+      end
+      if rem(h.lActualAcqLength,h.lActualEpisodes*h.nADCNumChannels)>0
+        fclose(fid);
+        error('file has no synch array, and its data points do not divide into sweeps of equal length');
+      end
+      h.sweepLengthInPts=h.lActualAcqLength/h.lActualEpisodes/h.nADCNumChannels;
+      h.recTime=[h.lFileStartTime NaN];
+    else
+      % the byte offset at which the SynchArraySection starts
+      h.lSynchArrayPtrByte=BLOCKSIZE*h.lSynchArrayPtr;
+      % before reading Synch Arr parameters check if file is big enough to hold them
+      % 4 bytes/long, 2 values per episode (start and length)
+      if h.lSynchArrayPtrByte+2*4*h.lSynchArraySize>fileSz
+        fclose(fid);
+        error('file seems not to contain complete Synch Array Section');
+      end
+      if fseek(fid,h.lSynchArrayPtrByte,'bof')~=0
+        fclose(fid);
+        error('something went wrong positioning file pointer to Synch Array Section');
+      end
+      [synchArr,n]=fread(fid,h.lSynchArraySize*2,'int32');
+      if n~=h.lSynchArraySize*2
+        fclose(fid);
+        error('something went wrong reading synch array section');
+      end
+      % make synchArr a h.lSynchArraySize x 2 matrix
+      synchArr=permute(reshape(synchArr',2,h.lSynchArraySize),[2 1]);
+      if numel(unique(synchArr(:,2)))>1
+        fclose(fid);
+        error('sweeps of unequal length in file recorded in fixed-length mode');
+      end
+      % the length of sweeps in sample points (**note: parameter lLength of
+      % the ABF synch section is expressed in samples (ticks) whereas
+      % parameter lStart is given in synchArrTimeBase units)
+      h.sweepLengthInPts=synchArr(1,2)/h.nADCNumChannels;
+      % the starting ticks of episodes in sample points (t0=1=beginning of
+      % recording)
+      h.sweepStartInPts=synchArr(:,1)*(h.synchArrTimeBase/h.fADCSampleInterval/h.nADCNumChannels);
+      % recording start and stop times in seconds from midnight
+      h.recTime=h.lFileStartTime;
+      h.recTime=h.recTime+[0  (1e-6*(h.sweepStartInPts(end)+h.sweepLengthInPts))*h.fADCSampleInterval*h.nADCNumChannels];
     end
-    % the byte offset at which the SynchArraySection starts
-    h.lSynchArrayPtrByte=BLOCKSIZE*h.lSynchArrayPtr;
-    % before reading Synch Arr parameters check if file is big enough to hold them
-    % 4 bytes/long, 2 values per episode (start and length)
-    if h.lSynchArrayPtrByte+2*4*h.lSynchArraySize>fileSz
-      fclose(fid);
-      error('file seems not to contain complete Synch Array Section');
-    end
-    if fseek(fid,h.lSynchArrayPtrByte,'bof')~=0
-      fclose(fid);
-      error('something went wrong positioning file pointer to Synch Array Section');
-    end
-    [synchArr,n]=fread(fid,h.lSynchArraySize*2,'int32');
-    if n~=h.lSynchArraySize*2
-      fclose(fid);
-      error('something went wrong reading synch array section');
-    end
-    % make synchArr a h.lSynchArraySize x 2 matrix
-    synchArr=permute(reshape(synchArr',2,h.lSynchArraySize),[2 1]);
-    if numel(unique(synchArr(:,2)))>1
-      fclose(fid);
-      error('sweeps of unequal length in file recorded in fixed-length mode');
-    end
-    % the length of sweeps in sample points (**note: parameter lLength of
-    % the ABF synch section is expressed in samples (ticks) whereas
-    % parameter lStart is given in synchArrTimeBase units)
-    h.sweepLengthInPts=synchArr(1,2)/h.nADCNumChannels;
-    % the starting ticks of episodes in sample points (t0=1=beginning of
-    % recording)
-    h.sweepStartInPts=synchArr(:,1)*(h.synchArrTimeBase/h.fADCSampleInterval/h.nADCNumChannels);
-    % recording start and stop times in seconds from midnight
-    h.recTime=h.lFileStartTime;
-    h.recTime=h.recTime+[0  (1e-6*(h.sweepStartInPts(end)+h.sweepLengthInPts))*h.fADCSampleInterval*h.nADCNumChannels];
     % determine first point and number of points to be read
     startPt=0;
     h.dataPts=h.lActualAcqLength;
