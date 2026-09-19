@@ -1,9 +1,10 @@
 classdef FileAdapterTest < matlab.unittest.TestCase
-%FileAdapterTest - Tests for the NWB and DelimitedText file adapters of the module
+%FileAdapterTest - Tests for the file adapters of the module
 %
 %   Each test writes a small file of the format and loads it with the
-%   adapter. The ABF adapter needs a recorded ABF file, which there is no
-%   way to write, and is tested on files downloaded from EBRAINS instead.
+%   adapter: DelimitedText, JSON, XML, NIfTI, NWB, and NeoPickle and
+%   NeoNix, whose files are written with Neo in Python. ABF and IgorPro
+%   are not tested here: MATLAB cannot write either format.
 %
 %   Run tests:
 %       runtests('FileAdapterTest')
@@ -29,6 +30,28 @@ classdef FileAdapterTest < matlab.unittest.TestCase
             testCase.verifyClass(data, 'table')
             testCase.verifyEqual(data.Properties.VariableNames, {'time', 'voltage'})
             testCase.verifyEqual(data.voltage, [-65.5; -64.25])
+        end
+
+        function testDelimitedTextKeepsCommentHeader(testCase)
+            filePath = fullfile(testCase.Folder, "trace_ch5_578.dat");
+            writelines(["#"; "# DATE#17/09/2015 (5)"; "# STIMULUSDEF##" + char(9) + "Name" + char(9) + "Units"; ...
+                "0" + char(9) + "2.25e-08"; "0.2" + char(9) + "2.875e-08"], filePath)
+
+            data = nansen.module.sharebrain.fileadapter.DelimitedText(char(filePath)).load();
+
+            testCase.verifyEqual(width(data), 2)
+            testCase.verifyEqual(data{:, 2}, [2.25e-08; 2.875e-08])
+            testCase.verifyTrue(contains(data.Properties.Description, "DATE#17/09/2015"))
+        end
+
+        function testDelimitedTextSkipsCommentLinesAfterData(testCase)
+            filePath = fullfile(testCase.Folder, "positions.csv");
+            writelines(["x,y"; "1,2"; "# pause"; "3,4"], filePath)
+
+            data = nansen.module.sharebrain.fileadapter.DelimitedText(char(filePath)).load();
+
+            testCase.verifyEqual(data.Properties.VariableNames, {'x', 'y'})
+            testCase.verifyEqual(data.y, [2; 4])
         end
 
         function testDelimitedTextReadsCsv(testCase)
